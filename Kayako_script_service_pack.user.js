@@ -8,92 +8,20 @@
 // ==/UserScript==
 
 //begin
-/*
-var script = document.createElement('script');
-script.src = "https://raw.githubusercontent.com/kolosochek/kayako/master/autocomplete.js";
-script.type = "text/javascript"
-document.body.appendChild(script);
-*/
-//debug
-//console.log("gotcha");
-/*
-GM_xmlhttpRequest({
-	method:     "GET",
-	url:        settings.predefined_replies_url,
-	data:       "",
-	headers:    {
-		"Content-Type": "application/x-www-form-urlencoded"
-	},
-	onload: function (response) {
-		// debug
-		console.log(response);//.responseText);
-	},
-	ontimeout: function(){
-		// debug
-	    console.log('Timeout');
-	},
-	// request timeout, 4s for best perfomance
-	timeout: settings.request_timeout,
-});
-var textarea = document.querySelector("#tab_ttpostreply textarea");
-var another_crewmember_replying = "Внимание! На этот запрос уже отвечает другой сотрудник!\n"
-var separator = ',';
-// get current crewmember
-var who_am_i = document.querySelectorAll("span.smalltext")[1].textContent.trim();
-who_am_i = who_am_i.split('|')[0].replace('Logged In:', '').trim();
-
-textarea.addEventListener('input', function(){
-	if (document.querySelectorAll("#mcblock_reply").length){
-		var crewmembers_replying = document.getElementById("mcblock_reply_users").textContent.trim();
-		if (crewmembers_replying){
-			var crewmembers_replying_arr = crewmembers_replying.split(separator);
-			if (crewmembers_replying_arr){
-				for(i=0;i<crewmembers_replying_arr.length;i++){
-					if(crewmembers_replying_arr[i] != who_am_i){
-						if(!(this.value.search(another_crewmember_replying) + 1)){
-							// change textarea style
-							textarea.style.border = "4px solid red";
-							textarea.style.background = "rgb(255, 201, 201) none repeat scroll 0% 0%;";
-							textarea.style.width = "99%"
-							//this.value = another_crewmember_replying + this.value;	
-						}
-					}
-				}
-			}
-		}
-	}
-});
-// debug
-console.log(textarea);
-*/
-
-
-
 var settings = new Object({
-	'request_timeout': 5000,
+	'request_timeout': 5000, // request timeout 5s
 	'refresh_timeout': 15000, // send request every 15 seconds
 	'alert_file_url': "https://raw.githubusercontent.com/kolosochek/kayako/master/alert.mp3",
 	'alert_file_url_ogg': '',
 	'tickets_on_the_page_selector': "#ticketlist td.contenttableborder tr",
+	'predefined_replies_url': "https://support.mchost.ru/support/staff/index.php?_m=tickets&_a=managepredreplies",
 	// backup trmassaction block because we got wrong encoding in response
 	mass_action_backup: document.getElementById('trmassaction'),
-	//'predefined_replies_url': "https://support.mchost.ru/support/staff/index.php?_m=tickets&_a=managepredreplies",
 });
 
 var observer = new Object({
 	tickets_on_the_page: document.querySelectorAll(settings.tickets_on_the_page_selector),
 	timer: 0,
-	get_page_tickets: function(){
-		// get ticket list on current page
-		this.tickets_on_the_page = document.querySelectorAll(settings.tickets_on_the_page_selector);//"tr.row2");//"tr.rownotes");
-		/*var backup;
-		for(var i=0;i<this.tickets_on_the_page.length;i++){
-			if((i>0) && (i<this.tickets_on_the_page.length - 1)){
-				backup = this.tickets_on_the_page
-			}
-		}
-		*/
-	},
 	refresh_tickets_on_the_page: function(){
 		// don't forget to refresh tickets_on_the_page counter
 		this.tickets_on_the_page = document.querySelectorAll(settings.tickets_on_the_page_selector);
@@ -106,27 +34,6 @@ var observer = new Object({
 					{ links[j].target="_blank"}  
 			}
 		}
-		/* 
-		for(var i=0;i<this.tickets_on_the_page.length;i++){
-			//for(i=0;i<tickets.length;i++){ if ((tickets[i].id != '') && (tickets[i].id != "trmassaction")) { console.log(tickets[i].querySelector("a")) }}
-			// for(i=0;i<tickets.length;i++){ if ((tickets[i].id != '') && (tickets[i].id != "trmassaction")) { console.log(tickets[i]) }}
-			if ((this.tickets_on_the_page[i].id != '') && (this.tickets_on_the_page[i].id != "trmassaction")) {
-				var ticket_links = this.tickets_on_the_page[i].querySelectorAll('a');
-				// debug
-				console.log(ticket_links);
-				// if we have some links tickets on the page
-				if (ticket_links.length){
-					// let's iterate in and change target attribute
-					for(var i=0;i<this.ticket_links.length;i++){
-						// debug
-						console.log(ticket_links[i]);
-						ticket_links[i].target = '_blank';
-					}
-				}
-			}
-			
-		}
-		*/
 	},
 	set_observer: function (){
 		// debug
@@ -173,20 +80,18 @@ var observer = new Object({
 						// and then just apply new tickets to the page
 						document.getElementById('ticketlist').innerHTML = dom.innerHTML;
 						// restore trmassaction block from backup
-						settings.mass_action_backup.innerHTML = backup.innerHTML;
-						// refresh current tickets counter
-						observer.refresh_tickets_on_the_page();
+						document.getElementById('trmassaction').innerHTML = settings.mass_action_backup.innerHTML;
 					} else if(observer.tickets_on_the_page.length > tickets_in_response.length) {
 						// insert loaded tickets
 						document.getElementById('ticketlist').innerHTML = dom.innerHTML;
 						// restore trmassaction block from backup
-						settings.mass_action_backup.innerHTML = backup.innerHTML;
-						// refresh current tickets counter
-						observer.refresh_tickets_on_the_page();
+						document.getElementById('trmassaction').innerHTML = settings.mass_action_backup.innerHTML;
 					} else {
 						// debug
 						console.log("No new tickets");
 					}
+					// refresh current tickets counter
+					observer.refresh_tickets_on_the_page();
 				},
 				ontimeout: function(){
 					// debug
@@ -210,7 +115,7 @@ function play_sound(){
 // toolbox feature
 var toolbox = document.createElement('div');
 toolbox.id = 'toolbox';
-toolbox.style.position = 'absolute';
+toolbox.style.position = 'fixed';
 var button_set_observer = '<button id="set_observer">Set observer</button>';
 var button_remove_observer = '<button id="remove_observer">Remove observer</button>';
 toolbox.innerHTML+=button_set_observer+button_remove_observer;
@@ -224,6 +129,7 @@ button_set_observer.addEventListener('click', function(){
 	button_set_observer.disabled = 'true';
 	button_remove_observer.disabled = '';
 	observer.set_observer();
+	observer.refresh_tickets_on_the_page();
 });
 // remove
 button_remove_observer.addEventListener('click', function(){
@@ -233,3 +139,63 @@ button_remove_observer.addEventListener('click', function(){
 });
 
 //end 
+
+/*
+var script = document.createElement('script');
+script.src = "https://raw.githubusercontent.com/kolosochek/kayako/master/autocomplete.js";
+script.type = "text/javascript"
+document.body.appendChild(script);
+*/
+//debug
+//console.log("gotcha");
+/*
+GM_xmlhttpRequest({
+	method:     "GET",
+	url:        settings.predefined_replies_url,
+	data:       "",
+	headers:    {
+		"Content-Type": "application/x-www-form-urlencoded"
+	},
+	onload: function (response) {
+		// debug
+		console.log(response);//.responseText);
+	},
+	ontimeout: function(){
+		// debug
+	    console.log('Timeout');
+	},
+	// request timeout
+	timeout: settings.request_timeout,
+});
+var textarea = document.querySelector("#tab_ttpostreply textarea");
+var another_crewmember_replying = "Внимание! На этот запрос уже отвечает другой сотрудник!\n"
+var separator = ',';
+// get current crewmember
+var who_am_i = document.querySelectorAll("span.smalltext")[1].textContent.trim();
+who_am_i = who_am_i.split('|')[0].replace('Logged In:', '').trim();
+
+textarea.addEventListener('input', function(){
+	if (document.querySelectorAll("#mcblock_reply").length){
+		var crewmembers_replying = document.getElementById("mcblock_reply_users").textContent.trim();
+		if (crewmembers_replying){
+			var crewmembers_replying_arr = crewmembers_replying.split(separator);
+			if (crewmembers_replying_arr){
+				for(i=0;i<crewmembers_replying_arr.length;i++){
+					if(crewmembers_replying_arr[i] != who_am_i){
+						// change textarea style
+						textarea.style.border = "4px solid red";
+						textarea.style.background = "rgb(255, 201, 201) none repeat scroll 0% 0%;";
+						textarea.style.width = "99%";
+
+						if(!(this.value.search(another_crewmember_replying) + 1)){
+							//this.value = another_crewmember_replying + this.value;
+						}
+					}
+				}
+			}
+		}
+	}
+});
+// debug
+//console.log(textarea);
+*/

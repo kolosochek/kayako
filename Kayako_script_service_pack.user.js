@@ -138,6 +138,26 @@ button_remove_observer.addEventListener('click', function(){
 	observer.remove_observer();
 });
 
+//scroll top
+var scrolltop = document.createElement('a');
+scrolltop.textContent = "^";
+scrolltop.id = 'scrolltop';
+scrolltop.href = "javascript:void(0)";
+scrolltop.style.position = 'fixed';
+scrolltop.style.bottom = "20px";
+scrolltop.style.right = "20px";
+scrolltop.style.background = "#F0EADE";
+scrolltop.style.color= "#6393DF";
+scrolltop.style.padding = "15px";
+scrolltop.style.borderRadius = "6px";
+
+document.body.insertBefore(scrolltop, document.body.firstChild);
+
+var scrolltop = document.getElementById('scrolltop');
+// bind event listener
+scrolltop.addEventListener('click', function(){
+	window.scrollTo(0,0);
+});
 //end 
 
 /*

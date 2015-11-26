@@ -146,7 +146,10 @@ var observer = new Object({
 				},
 				onload: function (response) {
 					// debug
-					//console.log(response);//.responseText);					
+					//console.log(response);//.responseText);
+					// refresh current tickets counter
+					observer.refresh_tickets_on_the_page();					
+					// slice tickets dom form string response
 					var chunk_form = '<form name="ticketlist" id="ticketlist" action="index.php" method="POST">'
 					var chunk_form_end = '</form>';
 					var form_html = response.responseText.substring(response.responseText.search(chunk_form), response.responseText.search(chunk_form_end));

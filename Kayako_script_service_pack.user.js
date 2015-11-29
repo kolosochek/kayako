@@ -21,7 +21,7 @@ var settings = new Object({
 // inject custom css
 var style = document.createElement('style');
 style.innerHTML = '.observer_is_set { background: green }' +
-'.observer_is_not_set { background: red }' +
+'.observer_is_not_set { background: #E3858C }' +
 '.observer_timeout { background: yellow }' + 
 '#toolbox { padding: 5px; position: fixed; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; margin: 0 0 0 5px; }' +
 document.body.appendChild(style);

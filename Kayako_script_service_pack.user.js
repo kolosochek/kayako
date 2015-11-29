@@ -102,7 +102,11 @@ var observer = new Object({
 					console.log("No new tickets");
 				}
 				// refresh current tickets counter
-				observer.refresh_tickets_on_the_page();
+				observer.refresh_tickets_on_the_page();						
+				// hilight_area
+				highlight_area.add_class("observer_is_set");
+				highlight_area.remove_class("observer_is_not_set");
+				highlight_area.remove_class("observer_timeout");
 			}
 			xhr.ontimeout = function(){
 				// debug
@@ -199,6 +203,9 @@ var highlight_area = new Object({
 });
 // by default page observer is not set
 highlight_area.add_class("observer_is_not_set");
+// and remove_observer button is disabled
+button_set_observer.disabled = '';
+button_remove_observer.disabled = 'true';
 
 //end 
 

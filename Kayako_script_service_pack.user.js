@@ -19,6 +19,43 @@ var settings = new Object({
 	mass_action_backup: document.getElementById('trmassaction'),
 });
 
+// inject custom css
+var style = document.createElement('style');
+style.innerHTML = '.observer_is_set { border: 2px solid green }' +
+'.observer_is_not_set { border: 5px dashed red }' +
+'.observer_timeout { border: 5px dashed yellow }'
+document.body.appendChild(style);
+
+var tools = new Object({
+	toggle_class: function(element, class_name){
+		if((typeof(element) == "object") && (class_name)){
+			//debug 
+			console.log('got object as element param and class_name param is not empty');
+			// if element already have some class
+			if((element.className != 'undefined') && (element.className.length)){
+				element.className+= class_name + ' ';
+			}
+		} else {
+			console.log('got wrong element or class_name to toggle!');
+		}
+	},
+});
+
+var highlight_area = new Object({
+	highlight_area_element: document.getElementById("gridtableoptticketlist").nextSibling,
+	toggle_class: function(className){
+		this.highlight_area_element.classList.toggle(className);
+	},	
+	remove_class: function(className){
+		this.highlight_area_element.classList.remove(className);
+	},
+});
+// by default page observer is not set
+highlight_area.toggle_class("observer_is_not_set")
+// debug
+console.log();
+
+
 var observer = new Object({
 	tickets_on_the_page: document.querySelectorAll(settings.tickets_on_the_page_selector),
 	timer: 0,
@@ -37,7 +74,11 @@ var observer = new Object({
 	},
 	set_observer: function (){
 		// debug
-		console.log('the observer sucsessfully set');
+		console.log('the observer sucsessfully set');		
+		// hilight_area
+		highlight_area.remove_class("observer_is_not_set");
+		highlight_area.remove_class("observer_timeout");
+		highlight_area.toggle_class("observer_is_set");
 		// get page tickets
 		this.tickets_on_the_page = document.querySelectorAll(settings.tickets_on_the_page_selector);//this.get_page_tickets();		
 		// send request
@@ -96,6 +137,10 @@ var observer = new Object({
 				ontimeout: function(){
 					// debug
 				    console.log('Timeout');
+				    // hilight_area
+					highlight_area.remove_class("observer_is_set");
+					highlight_area.remove_class("observer_is_not_set");
+					highlight_area.toggle_class("observer_timeout");
 				},
 				// request timeout
 				timeout: settings.request_timeout,
@@ -128,6 +173,7 @@ var button_remove_observer = document.getElementById('remove_observer');
 button_set_observer.addEventListener('click', function(){
 	button_set_observer.disabled = 'true';
 	button_remove_observer.disabled = '';
+	// observer
 	observer.set_observer();
 	observer.refresh_tickets_on_the_page();
 });
@@ -135,7 +181,13 @@ button_set_observer.addEventListener('click', function(){
 button_remove_observer.addEventListener('click', function(){
 	button_set_observer.disabled = '';
 	button_remove_observer.disabled = 'true';
+	// hilight_area
+	highlight_area.remove_class("observer_is_set");
+	highlight_area.remove_class("observer_timeout");
+	highlight_area.toggle_class("observer_is_not_set");
+	// observer
 	observer.remove_observer();
+	observer.refresh_tickets_on_the_page();
 });
 
 //scroll top

@@ -3,8 +3,7 @@
 // @namespace   https://support.mchost.ru/support/staff/*
 // @description 31337 mchost ticket system help tools pack, like fast search in predefined replies, fast search into whois or dig and even more.
 // @include		https://support.mchost.ru/support/*
-// @version     1
-// @grant GM_xmlhttpRequest
+// @version     1.2
 // ==/UserScript==
 
 //begin
@@ -21,40 +20,11 @@ var settings = new Object({
 
 // inject custom css
 var style = document.createElement('style');
-style.innerHTML = '.observer_is_set { border: 2px solid green }' +
-'.observer_is_not_set { border: 5px dashed red }' +
-'.observer_timeout { border: 5px dashed yellow }'
+style.innerHTML = '.observer_is_set { background: green }' +
+'.observer_is_not_set { background: red }' +
+'.observer_timeout { background: yellow }' + 
+'#toolbox { padding: 5px; position: fixed; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; margin: 0 0 0 5px; }' +
 document.body.appendChild(style);
-
-var tools = new Object({
-	toggle_class: function(element, class_name){
-		if((typeof(element) == "object") && (class_name)){
-			//debug 
-			console.log('got object as element param and class_name param is not empty');
-			// if element already have some class
-			if((element.className != 'undefined') && (element.className.length)){
-				element.className+= class_name + ' ';
-			}
-		} else {
-			console.log('got wrong element or class_name to toggle!');
-		}
-	},
-});
-
-var highlight_area = new Object({
-	highlight_area_element: document.getElementById("gridtableoptticketlist").nextSibling,
-	toggle_class: function(className){
-		this.highlight_area_element.classList.toggle(className);
-	},	
-	remove_class: function(className){
-		this.highlight_area_element.classList.remove(className);
-	},
-});
-// by default page observer is not set
-highlight_area.toggle_class("observer_is_not_set")
-// debug
-console.log();
-
 
 var observer = new Object({
 	tickets_on_the_page: document.querySelectorAll(settings.tickets_on_the_page_selector),
@@ -74,77 +44,76 @@ var observer = new Object({
 	},
 	set_observer: function (){
 		// debug
-		console.log('the observer sucsessfully set');		
+		console.log('the observer sucsessfully set');
 		// hilight_area
+		highlight_area.add_class("observer_is_set");
 		highlight_area.remove_class("observer_is_not_set");
 		highlight_area.remove_class("observer_timeout");
-		highlight_area.toggle_class("observer_is_set");
 		// get page tickets
 		this.tickets_on_the_page = document.querySelectorAll(settings.tickets_on_the_page_selector);//this.get_page_tickets();		
 		// send request
 		this.timer = setInterval(function(){
+			var url = window.location.href;
 			// debug
-			console.log('Send request: '+ window.location.href);
-			GM_xmlhttpRequest({
-				method:     "GET",
-				url:        window.location.href,
-				data:       "",
-				headers:    {
-					"Content-Type": "application/x-www-form-urlencoded"
-				},
-				onload: function (response) {
+			console.log('Send request: '+ url);
+			var xhr = new XMLHttpRequest();
+			// create async request
+			xhr.open('GET', url, true);
+			xhr.send();
+			xhr.onload = function () {
+				response = xhr.responseText;
+				// debug
+				//console.log('response');
+				//console.log(response);
+				// refresh current tickets counter
+				observer.refresh_tickets_on_the_page();					
+				// slice tickets dom form string response
+				var chunk_form = '<form name="ticketlist" id="ticketlist" action="index.php" method="POST">'
+				var chunk_form_end = '</form>';
+				var form_html = response.substring(response.search(chunk_form), response.search(chunk_form_end));
+				form_html+= chunk_form_end;
+				// debug
+				//console.log(form_html);
+				var dom = document.createElement('div');
+				dom.innerHTML = form_html;
+				// store new data in dummy html element
+				var tickets_in_response = dom.querySelectorAll(settings.tickets_on_the_page_selector);//"tr.rownotes");
+				// debug
+				console.log('Tickets on the page: ' + (observer.tickets_on_the_page.length - 2));
+				console.log('Tickets in response: ' + (tickets_in_response.length - 2));
+				// check results
+				if (observer.tickets_on_the_page.length < tickets_in_response.length){
 					// debug
-					//console.log(response);//.responseText);
-					// refresh current tickets counter
-					observer.refresh_tickets_on_the_page();					
-					// slice tickets dom form string response
-					var chunk_form = '<form name="ticketlist" id="ticketlist" action="index.php" method="POST">'
-					var chunk_form_end = '</form>';
-					var form_html = response.responseText.substring(response.responseText.search(chunk_form), response.responseText.search(chunk_form_end));
-					form_html+= chunk_form_end;
+					console.log('Got new ticket!');
+					//
+					// play sound
+					play_sound();
+							// and then just apply new tickets to the page
+					document.getElementById('ticketlist').innerHTML = dom.innerHTML;
+					// restore trmassaction block from backup
+					document.getElementById('trmassaction').innerHTML = settings.mass_action_backup.innerHTML;
+				} else if(observer.tickets_on_the_page.length > tickets_in_response.length) {
+					// insert loaded tickets
+					document.getElementById('ticketlist').innerHTML = dom.innerHTML;
+					// restore trmassaction block from backup
+					document.getElementById('trmassaction').innerHTML = settings.mass_action_backup.innerHTML;
+				} else {
 					// debug
-					//console.log(form_html);
-					var dom = document.createElement('div');
-					dom.innerHTML = form_html;
-					// store new data in dummy html element
-					var tickets_in_response = dom.querySelectorAll(settings.tickets_on_the_page_selector);//"tr.rownotes");
-					// debug
-					console.log('tickets on the page: ' + (observer.tickets_on_the_page.length - 2));
-					console.log('tickets in response: ' + (tickets_in_response.length - 2));
-					// check results
-					if (observer.tickets_on_the_page.length < tickets_in_response.length){
-						// debug
-						console.log('Got new ticket!');
-						//
-						// play sound
-						play_sound();
-						// and then just apply new tickets to the page
-						document.getElementById('ticketlist').innerHTML = dom.innerHTML;
-						// restore trmassaction block from backup
-						document.getElementById('trmassaction').innerHTML = settings.mass_action_backup.innerHTML;
-					} else if(observer.tickets_on_the_page.length > tickets_in_response.length) {
-						// insert loaded tickets
-						document.getElementById('ticketlist').innerHTML = dom.innerHTML;
-						// restore trmassaction block from backup
-						document.getElementById('trmassaction').innerHTML = settings.mass_action_backup.innerHTML;
-					} else {
-						// debug
-						console.log("No new tickets");
-					}
-					// refresh current tickets counter
-					observer.refresh_tickets_on_the_page();
-				},
-				ontimeout: function(){
-					// debug
-				    console.log('Timeout');
-				    // hilight_area
-					highlight_area.remove_class("observer_is_set");
-					highlight_area.remove_class("observer_is_not_set");
-					highlight_area.toggle_class("observer_timeout");
-				},
-				// request timeout
-				timeout: settings.request_timeout,
-			});
+					console.log("No new tickets");
+				}
+				// refresh current tickets counter
+				observer.refresh_tickets_on_the_page();
+			}
+			xhr.ontimeout = function(){
+				// debug
+				console.log('Timeout');
+				// hilight_area
+				highlight_area.remove_class("observer_is_set");
+				highlight_area.remove_class("observer_is_not_set");
+				highlight_area.add_class("observer_timeout");
+			}
+			// request timeout
+			xhr.timeout = settings.request_timeout;
 		}, settings.refresh_timeout);
 	},
 	remove_observer: function(){
@@ -184,11 +153,13 @@ button_remove_observer.addEventListener('click', function(){
 	// hilight_area
 	highlight_area.remove_class("observer_is_set");
 	highlight_area.remove_class("observer_timeout");
-	highlight_area.toggle_class("observer_is_not_set");
+	highlight_area.add_class("observer_is_not_set");
 	// observer
 	observer.remove_observer();
 	observer.refresh_tickets_on_the_page();
 });
+
+
 
 //scroll top
 var scrolltop = document.createElement('a');
@@ -210,6 +181,25 @@ var scrolltop = document.getElementById('scrolltop');
 scrolltop.addEventListener('click', function(){
 	window.scrollTo(0,0);
 });
+
+
+
+// hilight area feature
+var highlight_area = new Object({
+	highlight_area_element: document.getElementById("toolbox"),//("set_observer"),//("gridtableoptticketlist").nextSibling,
+	toggle_class: function(className){
+		this.highlight_area_element.classList.toggle(className);
+	},	
+	remove_class: function(className){
+		this.highlight_area_element.classList.remove(className);
+	},
+	add_class: function(className){
+		this.highlight_area_element.classList.add(className);
+	}
+});
+// by default page observer is not set
+highlight_area.add_class("observer_is_not_set");
+
 //end 
 
 /*

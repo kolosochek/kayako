@@ -72,7 +72,7 @@ function autocomplete(container, config){
     var dropDown = document.createElement('div');
     dropDown.id = "autocomplete_dropdown";
     dropDown.style.position = 'absolute';
-    //dropDown.style.visibility = 'hidden';
+    dropDown.style.visibility = 'hidden';
     dropDown.style.top = '0px !important';
     dropDown.style.margin = "3px 0 0 12px";
     dropDown.style.outline = '0';

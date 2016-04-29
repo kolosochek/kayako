@@ -21,7 +21,7 @@ function autocomplete(container, config){
     txtHint.style.top =  '0';
     txtHint.style.left = '0';
     txtHint.style.width = '100%';
-    txtHint.style.height = '100%';
+    //txtHint.style.height = '100%';
     txtHint.style.borderColor = 'transparent';
     txtHint.style.background = 'transparent';
     txtHint.style.boxShadow =   'none';
@@ -74,7 +74,7 @@ function autocomplete(container, config){
     dropDown.style.position = 'absolute';
     //dropDown.style.visibility = 'hidden';
     dropDown.style.top = '20px';
-    dropDown.style.left = "5px";
+    dropDown.style.left = "40px";
     dropDown.style.outline = '0';
     dropDown.style.margin =  '0';
     dropDown.style.padding = '0';
@@ -85,7 +85,7 @@ function autocomplete(container, config){
     dropDown.style.zIndex = config.dropDownZIndex;
     dropDown.style.cursor = 'default';
     dropDown.style.borderStyle = 'solid';
-    dropDown.style.borderWidth = '1px';
+    dropDown.style.borderWidth = '0px';
     dropDown.style.borderColor = config.dropDownBorderColor;
     dropDown.style.overflowX= 'hidden';
     dropDown.style.whiteSpace = 'pre';

@@ -33,7 +33,7 @@ function autocomplete(container, config){
 
     var wrapper = document.createElement('div');
     wrapper.id = 'autocomplete_wrapper';
-    wrapper.style.position = 'absolute';
+    //wrapper.style.position = 'relative';
     wrapper.style.height = '100%';
     wrapper.style.outline = '0';
     wrapper.style.border =  '0';

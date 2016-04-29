@@ -26,14 +26,14 @@ function autocomplete(container, config){
     txtHint.style.background = 'transparent';
     txtHint.style.boxShadow =   'none';
     txtHint.style.color = config.hintColor;
-
+    
     txtInput.style.backgroundColor ='transparent';
     txtInput.style.verticalAlign = 'top';
     txtInput.style.position = 'relative';
 
     var wrapper = document.createElement('div');
     wrapper.id = 'autocomplete_wrapper';
-    wrapper.style.position = 'relative';
+    wrapper.style.position = 'absolute';
     wrapper.style.height = '100%';
     wrapper.style.outline = '0';
     wrapper.style.border =  '0';
@@ -72,7 +72,9 @@ function autocomplete(container, config){
     var dropDown = document.createElement('div');
     dropDown.id = "autocomplete_dropdown";
     dropDown.style.position = 'absolute';
-    dropDown.style.visibility = 'hidden';
+    //dropDown.style.visibility = 'hidden';
+    dropDown.style.top = '20px';
+    dropDown.style.left = "5px";
     dropDown.style.outline = '0';
     dropDown.style.margin =  '0';
     dropDown.style.padding = '0';

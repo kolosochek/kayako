@@ -392,7 +392,7 @@ function autocomplete(container, config){
     }
     return rs;
 }
-var ac_selector = document.querySelector("#replyform textarea");
+var ac_selector = document.querySelector("#tab_ttpostreply textarea");
 var ac = autocomplete(ac_selector.parentNode);
 var combination = [
     // благодарю

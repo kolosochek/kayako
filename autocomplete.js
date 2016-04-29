@@ -18,8 +18,8 @@ function autocomplete(container, config){
     txtHint.id = 'autocomplete_hint';
     txtHint.disabled='';
     txtHint.style.position = 'absolute';
-    txtHint.style.top =  '0';
-    txtHint.style.left = '0';
+    //txtHint.style.top =  '0';
+    //txtHint.style.left = '0';
     txtHint.style.width = '100%';
     //txtHint.style.height = '100%';
     txtHint.style.borderColor = 'transparent';
@@ -73,8 +73,8 @@ function autocomplete(container, config){
     dropDown.id = "autocomplete_dropdown";
     dropDown.style.position = 'absolute';
     //dropDown.style.visibility = 'hidden';
-    dropDown.style.top = '20px';
-    dropDown.style.left = "40px";
+    dropDown.style.top = '0px !important';
+    dropDown.style.margin = "3px 0 0 12px";
     dropDown.style.outline = '0';
     dropDown.style.margin =  '0';
     dropDown.style.padding = '0';

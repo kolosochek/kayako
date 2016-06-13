@@ -9,7 +9,7 @@
 //begin
 var settings = new Object({
     'request_timeout': 10000, // request timeout 5s
-    'refresh_timeout': 30000, // send request every 15 seconds
+    'refresh_timeout': 10000, // send request every 15 seconds
     'alert_file_url': "https://raw.githubusercontent.com/kolosochek/kayako/master/alert.mp3",
     'alert_file_url_ogg': '',
     'tickets_on_the_page_selector': "#ticketlist td.contenttableborder tr",
@@ -27,7 +27,7 @@ var settings = new Object({
     'token': '',
     'combo': '',
     'result': '',
-    '_txtHint': '',
+    'hint': '',
     'newline': '\n',
     'charset': '&usecharset=2',
     'current_page': undefined,
@@ -91,7 +91,9 @@ var settings = new Object({
         if (!mirrorDiv) {
             mirrorDiv = document.createElement('div');
             mirrorDiv.id = element.nodeName + '--mirror-div';
-            document.body.appendChild(mirrorDiv);
+            //mirrodDiv.style.height = '12px';
+            document.getElementById("tab_ttpostreply").appendChild(mirrorDiv);
+            //document.body.appendChild(mirrorDiv);
         }
 
         style = mirrorDiv.style;
@@ -105,7 +107,7 @@ var settings = new Object({
         // position off-screen
         style.position = 'absolute'; // required to return coordinates properly
         style.top = element.offsetTop + parseInt(computed.borderTopWidth) + 'px';
-        style.left = "400px";
+        style.left = "0px";
         style.visibility = 'hidden'; // not 'display: none' because we want rendering
 
         // transfer the element's properties to the div
@@ -339,7 +341,7 @@ settings.combination = [{
         // пожалуйста
         {
             id: 'пож',
-            options: ['пожалуйста, ']
+            options: ['Пожалуйста, ']
         },
         // всегда
         {
@@ -445,20 +447,32 @@ settings.combination = [{
             id: 'ифс',
             options: ["https://cp.mchost.ru/backup_request.php"]
         },
-
+        //
+        {
+            id: 'в конфиге',
+            options: ["В конфигурационных файлах CMS"]
+        },
+        // перенос к нам
+        {
+            id: 'если Вы хотите пере',
+            options: ["Если Вы хотите перенести сайт с другого хостинга к нам - наши специалисты помогут Вам. Для этого укажите какой именно сайт(сайты) нужно перенести, предоставьте все данные от предыдущего хостинга, какие есть(FTP/SSH, MySQL/PhpMyAdmin), поможем."]
+        },
+    
     ];
 
-// lol jquery loading only on detail tickets page.
+// lol jQuery loading only on detail tickets page.
 if (typeof jQuery === "undefined") {
-    settings._txtHint = document.querySelector("#autocomplete_hint");
+    settings.hint = document.querySelector("#autocomplete_hint");
     settings.reply_input = document.querySelector("#tab_ttpostreply #replyform textarea");
     settings.current_page = 'category';
-    document.body.className += ' category__page';
+    document.body.className += ' category__page kayako__page';
 } else {
-    settings._txtHint = jQuery("#autocomplete_hint").get(0);
-    settings.reply_input = document.querySelector("#tab_ttpostreply #replyform textarea"); //jQuery("#tab_ttpostreply replyform textarea").get(0);
-    settings.current_page = 'detail';
-    document.body.className += ' detail__page';
+    // firefox(greasemonkey) don't like that
+    //$(document).ready(function(){
+        settings.reply_input = document.querySelector("#tab_ttpostreply #replyform textarea"); //jQuery("#tab_ttpostreply replyform textarea").get(0);
+        settings.current_page = 'detail';
+        document.body.className += ' detail__page kayako__page';
+    //});
 }
 // inject custom css
 var style = document.createElement('style');
@@ -643,7 +657,7 @@ if (settings.current_page == 'detail') {
                         elem.style.top = '';
                         elem.style.bottom = '100%';
                     } else {
-                        elem.style.top = '100%';
+                        //elem.style.top = '100%';
                         elem.style.bottom = '';
                         elem.style.maxHeight = distanceToBottom + 'px';
                     }
@@ -654,9 +668,9 @@ if (settings.current_page == 'detail') {
                         rows[oldIndex].style.backgroundColor = config.backgroundColor;
                     }
                     rows[index].style.backgroundColor = config.dropDownOnHoverBackgroundColor; // <-- should be config
-                    $(rows[index]).trigger('click');
-                    $("#autocomplete_dropdown > div").removeClass('state__active');
-                    $(rows[index]).toggleClass("state__active");
+                    jQuery(rows[index]).trigger('click');
+                    jQuery("#autocomplete_dropdown > div").removeClass('state__active');
+                    jQuery(rows[index]).toggleClass("state__active");
                     oldIndex = index;
                 },
                 move: function(step) { // moves the selection either up or down (unless it's not possible) step is either +1 or -1.
@@ -718,7 +732,7 @@ if (settings.current_page == 'detail') {
             }
 
             // Used to encode an HTML string into a plain text.
-            // taken from http://stackoverflow.com/questions/1219860/javascript-jquery-html-encoding
+            // taken from http://stackoverflow.com/questions/1219860/javascript-jQuery-html-encoding
             spacer.innerHTML = String(text).replace(/&/g, '&amp;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;')
@@ -757,6 +771,8 @@ if (settings.current_page == 'detail') {
                 dropDownController.hide();
             },
             repaint: function() {
+                settings.dropdown = jQuery("#autocomplete_dropdown").length ? jQuery("#autocomplete_dropdown") : false;
+                settings.hint = jQuery("#autocomplete_hint").length ? jQuery("#autocomplete_hint") : false;
                 var options = settings.options;
                 var optionsLength = settings.options.length;
                 var chunk = settings.data.toLowerCase()
@@ -809,6 +825,7 @@ if (settings.current_page == 'detail') {
                     // moving the dropDown and refreshing it.
                     // debug
                     console.log('going to refresh dropDown');
+                    jQuery("#autocomplete_dropdown").show();
                     dropDownController.refresh(settings.token, settings.options);
                 }
                 settings.result = settings.leftSide + settings.combo;
@@ -819,8 +836,10 @@ if (settings.current_page == 'detail') {
                 jQuery("#autocomplete_dropdown").css('left', settings.caret_coords.left + 'px');
                 jQuery("#autocomplete_hint").css('top', settings.caret_coords.top + 'px');
                 jQuery("autocomplete_dropdown").css('top', settings.caret_coords.top + 'px');
+                console.log('top: '+ settings.caret_coords.top + 'px');
 
                 // debug
+                /*
                 console.log('------Debug:');
                 console.log('token : ' + settings.token);
                 console.log('text: ' + settings.text);
@@ -835,6 +854,9 @@ if (settings.current_page == 'detail') {
                 console.log('search: ' + settings.text.toLowerCase().search(settings.data.toLowerCase()));
                 console.log('------');
                 //
+                */
+
+                jQuery("#autocomplete_hint").show();
             }
         };
 
@@ -890,147 +912,154 @@ if (settings.current_page == 'detail') {
 
             if (keyCode == 27) { //escape
                 dropDownController.hide();
-                txtHint.value = txtInput.value; // ensure that no hint is left.
+                //txtHint.value = txtInput.value; // ensure that no hint is left.
+                settings.hint = 
                 txtInput.focus();
                 return;
             }
 
             if (keyCode == 39 || keyCode == 35 || keyCode == 9) { // right,  end, tab  (autocomplete triggered)
-                dropDownController.hide();
-                if (keyCode == 9) { // for tabs we need to ensure that we override the default behaviour: move to the next focusable HTML-element
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (txtHint.value.length == 0) {
-                        rs.onTab(); // tab was called with no action.
-                        // users might want to re-enable its default behaviour or handle the call somehow.
-                    }
-                }
-                // if there is a hint
-                if (txtHint.value.length > 0) {
+                if ( jQuery('#autocomplete_dropdown').is(":visible") || jQuery("#autocomplete_hint").is(":visible") ) {
+                //if((jQuery(settings.dropdown).is(":visible") || ((jQuery(settings.hint).is(":visible"))){
                     dropDownController.hide();
-                    // if there is one option, not mutiple options
-                    if (settings.options.length === 1) {
-                        //debug
-                        console.log('got single options, just txtHint');
-                        var token_arr = settings.token.split(' ');
-                        var index = -1;
-                        var slice = '';
-                        // check token words length
-                        if (token_arr.length === 1) { // single
-                            if (settings.text.length) {
-                                index = settings.text.toLowerCase().search(token_arr[0].trim());
-                            }
-                            // do we have token in left part of textarea text
-                            if (index >= 0) {
-                                slice = settings.text.substr(0, index);
-                                settings.result = slice + settings.combo;
-                            } else {
-                                slice = '';
-                                settings.result = settings.combo;
-                            }
-
-                        } else { // multiple
-                            for (i = 0; i < token_arr.length; i++) {
-                                /////
-                                ///// TODO: REFACTOR
-                                slice = settings.leftSide.replace(token_arr[i].trim(), '');
-                                /////
-                                /////
-                            }
-                            settings.result = slice + settings.combo;
+                    //// debug
+                    console.log('//////// DEBUG:');
+                    console.log(jQuery(dropDownController));
+                    //// debug
+                    if (keyCode == 9) { // for tabs we need to ensure that we override the default behaviour: move to the next focusable HTML-element
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (txtHint.value.length == 0) {
+                            rs.onTab(); // tab was called with no action.
+                            // users might want to re-enable its default behaviour or handle the call somehow.
                         }
-                        // multiple settings.options
-                    } else {
-                        var dropdown_text = '' //$("#autocomplete_dropdown:first > div.dropdown__active:first").text();
-                        console.log('\n \n \n \n');
-                        console.log('______________________________debug combo');
-                        console.log('dropdown_text: ' + dropdown_text);
-                        console.log('txtHint.value: ' + txtHint.value);
-                        console.log('slice: ' + slice);
-                        console.log('token: ' + settings.token);
-                        console.log('combo: ' + settings.combo);
-                        console.log('result: ' + settings.result);
-                        console.log('leftSide: ' + settings.leftSide);
-                        console.log('text: ' + settings.text);
-                        console.log("______________________________debug combo");
-                        console.log('\n \n \n \n');
-                        settings.result = settings.leftSide + txtHint.value;
                     }
+                    // if there is a hint
+                    if (txtHint.value.length > 0) {
+                        dropDownController.hide();
+                        // if there is one option, not mutiple options
+                        if (settings.options.length === 1) {
+                            //debug
+                            console.log('got single options, just txtHint');
+                            var token_arr = settings.token.split(' ');
+                            var index = -1;
+                            var slice = '';
+                            // check token words length
+                            if (token_arr.length === 1) { // single
+                                if (settings.text.length) {
+                                    index = settings.text.toLowerCase().search(token_arr[0].trim());
+                                }
+                                // do we have token in left part of textarea text
+                                if (index >= 0) {
+                                    slice = settings.text.substr(0, index);
+                                    settings.result = slice + settings.combo;
+                                } else {
+                                    slice = '';
+                                    settings.result = settings.combo;
+                                }
 
-                    settings.reply_input.value = settings.result;
+                            } else { // multiple
+                                for (i = 0; i < token_arr.length; i++) {
+                                    /////
+                                    ///// TODO: REFACTOR
+                                    slice = settings.leftSide.replace(token_arr[i].trim(), '');
+                                    /////
+                                    /////
+                                }
+                                settings.result = slice + settings.combo;
+                            }
+                            // multiple settings.options
+                        } else {
+                            console.log('\n \n \n \n');
+                            console.log('______________________________debug combo');
+                            console.log('txtHint.value: ' + txtHint.value);
+                            console.log('slice: ' + slice);
+                            console.log('token: ' + settings.token);
+                            console.log('combo: ' + settings.combo);
+                            console.log('result: ' + settings.result);
+                            console.log('leftSide: ' + settings.leftSide);
+                            console.log('text: ' + settings.text);
+                            console.log("______________________________debug combo");
+                            console.log('\n \n \n \n');
+                            settings.result = settings.leftSide + txtHint.value;
+                        }
 
+                        settings.reply_input.value = settings.result;
+                        var hasTextChanged = registerOnTextChangeOldValue != txtInput.value;
+                        registerOnTextChangeOldValue = txtInput.value; // <-- to avoid dropDown to appear again.
+                        // for example imagine the array contains the following words: bee, beef, beetroot
+                        // user has hit enter to get 'bee' it would be prompted with the dropDown again (as beef and beetroot also match)
+                        if (hasTextChanged) {
+                            rs.onChange(txtInput.value); // <-- forcing it.
+                        }
+                    }
+                    // hide dropdown & hint
+                    jQuery("#autocomplete_dropdown").hide();
+                    jQuery("#autocomplete_hint").hide();
 
+                    return;
+                }
+            }
+            if (keyCode == 13) { // enter  (autocomplete triggered)
+                if ( jQuery('#autocomplete_dropdown').is(":visible") || jQuery("#autocomplete_hint").is(":visible") ) {
+                    var active_row = jQuery("#autocomplete_dropdown > div.state__active").length ? jQuery("#autocomplete_dropdown > div.state__active") : false;
+                    if (txtHint.value.length == 0) { 
+                        rs.onEnter();                    
+                        settings.result = settings.leftSide + active_row.val();
+                    } else {
+                        var wasDropDownHidden = (dropDown.style.visibility == 'hidden');
+                        dropDownController.hide();
 
-
+                        if (wasDropDownHidden) {
+                            txtHint.value = txtInput.value; // ensure that no hint is left.
+                            txtInput.focus();
+                            rs.onEnter();
+                            return;
+                        }                 
+                        settings.result = txtHint.value;
+                    }
+                    settings.result = settings.leftSide + active_row.text();
+                    txtInput.value = settings.result;
                     var hasTextChanged = registerOnTextChangeOldValue != txtInput.value;
                     registerOnTextChangeOldValue = txtInput.value; // <-- to avoid dropDown to appear again.
-                    // for example imagine the array contains the following words: bee, beef, beetroot
-                    // user has hit enter to get 'bee' it would be prompted with the dropDown again (as beef and beetroot also match)
+                        // for example imagine the array contains the following words: bee, beef, beetroot
+                        // user has hit enter to get 'bee' it would be prompted with the dropDown again (as beef and beetroot also match)
                     if (hasTextChanged) {
                         rs.onChange(txtInput.value); // <-- forcing it.
                     }
-                }
-                return;
-            }
-            if (keyCode == 13) { // enter  (autocomplete triggered)
-                var active_row = jQuery("#autocomplete_dropdown > div.state__active");
-                // debug
-                console.log('active_row: '+ active_row.text());
-                if (txtHint.value.length == 0) { // if there is a hint
-                    console.log('got hint');
-                    rs.onEnter();                    
-                    settings.result = settings.leftSide + active_row.val();
-                } else {
-                    console.log('no hint');
-                    var wasDropDownHidden = (dropDown.style.visibility == 'hidden');
-                    dropDownController.hide();
-
-                    if (wasDropDownHidden) {
-                        txtHint.value = txtInput.value; // ensure that no hint is left.
-                        txtInput.focus();
-                        rs.onEnter();
-                        return;
-                    }                 
-                    settings.result = txtHint.value;
-                }
-                settings.result = settings.leftSide + active_row.text();
-                txtInput.value = settings.result;
-                var hasTextChanged = registerOnTextChangeOldValue != txtInput.value;
-                registerOnTextChangeOldValue = txtInput.value; // <-- to avoid dropDown to appear again.
-                    // for example imagine the array contains the following words: bee, beef, beetroot
-                    // user has hit enter to get 'bee' it would be prompted with the dropDown again (as beef and beetroot also match)
-                if (hasTextChanged) {
-                    rs.onChange(txtInput.value); // <-- forcing it.
-                }
+                // hide dropdown & hint
+                jQuery("#autocomplete_dropdown").hide();
+                jQuery("#autocomplete_hint").hide();
 
                 return;
-            }
-
-            if (keyCode == 40) { // down
-                var m = dropDownController.move(+1);
-                if (m == '') {
-                    rs.onArrowDown();
                 }
-                txtHint.value = m;
-                return;
             }
-
-            if (keyCode == 38) { // up
-                var m = dropDownController.move(-1);
-                if (m == '') {
-                    rs.onArrowUp();
+            // if we have active dropdown
+            if ( jQuery('#autocomplete_dropdown').is(":visible") ) {
+                if (keyCode == 40) { // down
+                    var m = dropDownController.move(+1);
+                    if (m == '') {
+                        rs.onArrowDown();
+                    }
+                    txtHint.value = m;
+                    return;
                 }
-                txtHint.value = m;
-                e.preventDefault();
-                e.stopPropagation();
-                return;
+
+                if (keyCode == 38) { // up
+                    var m = dropDownController.move(-1);
+                    if (m == '') {
+                        rs.onArrowUp();
+                    }
+                    txtHint.value = m;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return;
+                }
+                // it's important to reset the txtHint on key down.
+                // think: user presses a letter (e.g. 'x') and never releases... you get (xxxxxxxxxxxxxxxxx)
+                // and you would see still the hint
+                txtHint.value = ''; // resets the txtHint. (it might be updated onKeyUp)
             }
-
-            // it's important to reset the txtHint on key down.
-            // think: user presses a letter (e.g. 'x') and never releases... you get (xxxxxxxxxxxxxxxxx)
-            // and you would see still the hint
-            txtHint.value = ''; // resets the txtHint. (it might be updated onKeyUp)
-
         };
 
         if (txtInput.addEventListener) {
@@ -1195,7 +1224,9 @@ if (settings.current_page == 'category') {
                     // check results
                     if (observer.tickets_on_the_page.length < tickets_in_response.length) {
                         // debug
+                        console.log("---***---");
                         console.log('Got new ticket!');
+                        console.log("---***---");
                         //
                         // play sound
                         settings.play_sound();

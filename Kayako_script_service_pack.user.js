@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name        Kayako script service pack
+// @name        Elite Kayako script service pack
 // @namespace   https://support.mchost.ru/support/staff/*
 // @description 31337 mchost ticket system help tools pack, like fast search in predefined replies, fast search into whois or dig and even more.
 // @include     https://support.mchost.ru/support/*
-// @version     2.0
+// @version     2.0a
 // ==/UserScript==
 
 //begin
@@ -235,6 +235,11 @@ settings.combination = [{
                 'Вы можете настроить популярные почтовые сервисы(yandex, mailru или gmail) по этой инструкции https://qa.mchost.ru/q/kak-nastroit-yandeks-google-ili-mailru-pochtu-dlya-domena'
             ]
         },
+        // перенести
+        {
+            id: 'хотите перенес',
+            options: ['Если Вы хотите перенести сайт с другого хостинга к нам - наши специалисты помогут Вам. Для этого укажите какой именно сайт(сайты) нужно перенести, предоставьте все данные от предыдущего хостинга, какие есть(FTP/SSH, MySQL/PhpMyAdmin), поможем.']
+        },
         // благодарю
         {
             id: 'благодарю вас за',
@@ -446,6 +451,11 @@ settings.combination = [{
         {
             id: 'ифс',
             options: ["https://cp.mchost.ru/backup_request.php"]
+        },        
+        // ioncube zend guard
+        {
+            id: 'шщт',
+            options: ["https://qa.mchost.ru/q/kak-podklyuchit-zend-guard-zend-optimizer-i-ioncube-php-loader"]
         },
         //
         {
@@ -457,7 +467,7 @@ settings.combination = [{
             id: 'если Вы хотите пере',
             options: ["Если Вы хотите перенести сайт с другого хостинга к нам - наши специалисты помогут Вам. Для этого укажите какой именно сайт(сайты) нужно перенести, предоставьте все данные от предыдущего хостинга, какие есть(FTP/SSH, MySQL/PhpMyAdmin), поможем."]
         },
-    
+        // 
     ];
 
 // lol jQuery loading only on detail tickets page.
@@ -913,7 +923,8 @@ if (settings.current_page == 'detail') {
             if (keyCode == 27) { //escape
                 dropDownController.hide();
                 //txtHint.value = txtInput.value; // ensure that no hint is left.
-                settings.hint = 
+                $('#autocomplete_hint').val('');
+                $('#autocomplete_dropdown').hide();
                 txtInput.focus();
                 return;
             }
